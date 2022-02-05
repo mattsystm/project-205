@@ -10,7 +10,7 @@ pipeline {
         ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         APP_REPO_NAME = "matts-repo/phonebook-app"
         APP_NAME = "phonebook"
-        //CFN_KEYPAIR="davidskey"
+        //CFN_KEYPAIR="mattskey"
         HOME_FOLDER = "/home/ec2-user"
         GIT_FOLDER = sh(script:'echo ${GIT_URL} | sed "s/.*\\///;s/.git$//"', returnStdout:true).trim()
     }
@@ -50,7 +50,7 @@ pipeline {
                 script {
                     echo 'Waiting for Leader Manager'
 
-                    id = sh(script: 'aws ec2 describe-instances --filters Name=tag-value,Values=davids-docker-grand-master Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text',  returnStdout:true).trim()
+                    id = sh(script: 'aws ec2 describe-instances --filters Name=tag-value,Values=matts-docker-grand-master Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text',  returnStdout:true).trim()
 
                     echo '$id'
 
@@ -61,10 +61,10 @@ pipeline {
                     mid = sh(script: 'aws ec2 describe-instances --filters Name=tag-value,Values=dsvids-docker-manager-2 Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text',  returnStdout:true).trim()
                     sh 'aws ec2 wait instance-status-ok --instance-ids $mid'
                     
-                    wid = sh(script: 'aws ec2 describe-instances --filters Name=tag-value,Values=davids-docker-worker-1 Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text',  returnStdout:true).trim()
+                    wid = sh(script: 'aws ec2 describe-instances --filters Name=tag-value,Values=matts-docker-worker-1 Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text',  returnStdout:true).trim()
                     sh 'aws ec2 wait instance-status-ok --instance-ids $wid'
                     
-                    env.MASTER_INSTANCE_PUBLIC_IP = sh(script:'aws ec2 describe-instances --region ${AWS_REGION} --filters Name=tag-value,Values=davids-docker-grand-master Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[PublicIpAddress] --output text | sed "s/\\s*None\\s*//g"', returnStdout:true).trim()  
+                    env.MASTER_INSTANCE_PUBLIC_IP = sh(script:'aws ec2 describe-instances --region ${AWS_REGION} --filters Name=tag-value,Values=matts-docker-grand-master Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[PublicIpAddress] --output text | sed "s/\\s*None\\s*//g"', returnStdout:true).trim()  
                 }
             }
         }
@@ -92,7 +92,7 @@ pipeline {
 
         stage('Deploy App on Docker Swarm'){
             environment {
-                MASTER_INSTANCE_ID=sh(script:'aws ec2 describe-instances --region ${AWS_REGION} --filters Name=tag-value,Values=davids-docker-grand-master Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text', returnStdout:true).trim()
+                MASTER_INSTANCE_ID=sh(script:'aws ec2 describe-instances --region ${AWS_REGION} --filters Name=tag-value,Values=matts-docker-grand-master Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text', returnStdout:true).trim()
             }
             steps {
 
